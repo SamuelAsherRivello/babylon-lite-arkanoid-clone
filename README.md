@@ -57,7 +57,7 @@ Clear three authored waves. Normal bricks award 10 points; reinforced bricks awa
 
 ## Multiplayer
 
-The shared Colyseus server owns paddle bounds, ball movement, collisions, bricks, scores, lives, powerups, waves and match outcomes. The game supports two connected players. If both lanes are occupied, a third player sees the full-room state and can retry later. A late joiner receives the current board snapshot. A departing player's lane centers and becomes available; reconnecting creates a fresh anonymous player identity.
+The shared Colyseus server owns paddle bounds, ball movement, collisions, bricks, scores, lives, powerups, waves and match outcomes. The local paddle is predicted from current input for immediate feedback, while remote paddle snapshots are interpolated across a short render buffer; these presentation steps never change server-owned collisions or scoring. The game supports two connected players. If both lanes are occupied, a third player sees the full-room state and can retry later. A late joiner receives the current board snapshot. A departing player's lane centers and becomes available; reconnecting creates a fresh anonymous player identity.
 
 Sessions are in-memory and ephemeral. They can reset after all players leave or during hosting/deployment interruptions. There are no accounts, persistent identity, durable scores, room codes, or offline single-player fallback. GitHub Pages serves the static frontend; the multiplayer backend runs separately at the secure endpoint configured above. The client is pinned to the [shared multiplayer client v0.8.0](https://github.com/SamuelAsherRivello/rmc-colyseus-multiplayer-server/releases/tag/v0.8.0).
 
