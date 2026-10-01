@@ -6,7 +6,7 @@ The game uses a 320×576 logical playfield, matching the portrait 9:16 stage. Re
 
 `src/content/babylon/config.js` pins the Babylon Lite WebGPU engine to one sample, enables premultiplied alpha, and loads textures with nearest minification/magnification and no mipmaps. `src/content/Content.jsx` creates an internal render target from the available device-pixel dimensions, maps the logical center `(160, 288)` to the center of that target, and presents the target at native canvas dimensions. Resizing and device-pixel-ratio changes rebuild the target. Sprite positions and sizes use logical playfield coordinates.
 
-The default responsive viewport is portrait 9:16 (`src/ui/layout.js`). The UI remains in React and stays reachable over the playfield. **O** opens orientation settings; **P** pauses only the local display/input, leaving the shared server match active. The app requires WebGPU. If WebGPU is unavailable, the page displays an explanation and keeps the surrounding UI available.
+The game uses one responsive portrait 9:16 viewport (`src/ui/layout.js`) so its two-player lanes and shared playfield remain consistent across devices. There is no orientation toggle. The UI remains in React and stays reachable over the playfield. **O** opens settings; **P** pauses only the local display/input, leaving the shared server match active. The app requires WebGPU. If WebGPU is unavailable, the page displays an explanation and keeps the surrounding UI available.
 
 ## Running and testing
 

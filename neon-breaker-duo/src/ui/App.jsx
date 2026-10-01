@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import versionText from "../../../version.txt?raw";
 import { BrowserSurface } from "./BrowserSurface.jsx";
-import { aspectRatioPresets, defaultLayout } from "./layout.js";
+import { defaultLayout } from "./layout.js";
 import { Dialog } from "./Dialog.jsx";
 import { getRenderScaleDisplayText } from "../content/babylon/showcase-overlay.js";
 import {
@@ -13,7 +13,7 @@ import { ViewportInfoContext } from "./ViewportInfoContext.jsx";
 
 const configStorageKey = "neon-breaker-duo.config";
 const fullscreenStorageKey = "neon-breaker-duo.fullscreen";
-const defaultConfig = Object.freeze({ fullscreen: false, orientation: null, hudVisible: true, renderPreset: "native" });
+const defaultConfig = Object.freeze({ fullscreen: false, hudVisible: true, renderPreset: "native" });
 const repositoryUrl = "https://github.com/SamuelAsherRivello/babylon-lite-arkanoid-clone";
 
 function readConfig() {
@@ -23,7 +23,6 @@ function readConfig() {
       fullscreen: typeof saved?.fullscreen === "boolean"
         ? saved.fullscreen
         : localStorage.getItem(fullscreenStorageKey) === "true",
-      orientation: saved?.orientation === "portrait" || saved?.orientation === "landscape" ? saved.orientation : defaultConfig.orientation,
       hudVisible: typeof saved?.hudVisible === "boolean" ? saved.hudVisible : defaultConfig.hudVisible,
       renderPreset: isRenderResolutionPreset(saved?.renderPreset) ? saved.renderPreset : defaultConfig.renderPreset,
     };
@@ -46,16 +45,9 @@ function GitHubMark() {
 
 export function App({ layout = defaultLayout, content = null, gutters = {} }) {
   const [config, setConfig] = useState(readConfig);
-  const { orientation: orientationOverride, hudVisible, renderPreset } = config;
-  const setOrientationOverride = (orientation) => setConfig((current) => ({ ...current, orientation }));
+  const { hudVisible, renderPreset } = config;
   const setHudVisible = (hudVisible) => setConfig((current) => ({ ...current, hudVisible }));
-  const landscape = (orientationOverride ?? layout.orientation) === "landscape";
-  const portrait = !landscape;
-  const activeLayout = orientationOverride === null ? layout : {
-    ...layout,
-    orientation: orientationOverride,
-    ...aspectRatioPresets[orientationOverride],
-  };
+  const activeLayout = layout;
   const fullscreenPreferred = config.fullscreen;
   const [viewportPixels, setViewportPixels] = useState({ width: 0, height: 0 });
   const [windowPixels, setWindowPixels] = useState({ width: window.innerWidth, height: window.innerHeight });
@@ -104,10 +96,9 @@ export function App({ layout = defaultLayout, content = null, gutters = {} }) {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
       const key = event.key.toLowerCase();
       if (key === "f") toggleFullscreen();
-      if (key === "o") setConfig((current) => ({ ...current, orientation: current.orientation === "portrait" ? "landscape" : "portrait" }));
+      if (key === "o") setActiveDialog((dialog) => dialog === "config" ? null : "config");
       if (key === "h") setConfig((current) => ({ ...current, hudVisible: !current.hudVisible }));
       if (key === "t") resetLocalStorage();
-      if (key === "c") setActiveDialog((dialog) => dialog === "config" ? null : "config");
       if (key === "v") setActiveDialog((dialog) => dialog === "stats" ? null : "stats");
       if (key === "b") setActiveDialog((dialog) => dialog === "babylon" ? null : "babylon");
       if (key === "r" && !event.repeat) setConfig((current) => ({
@@ -189,7 +180,6 @@ export function App({ layout = defaultLayout, content = null, gutters = {} }) {
           {activeDialog === "babylon" ? <div className="dialog_options babylon_settings"><div>Babylon Lite</div><div>{renderResolutionText}</div><div>{getRenderScaleDisplayText(renderScale)}</div><div>Mode: 2DPixelPerfect</div></div>
             : activeDialog === "config" ? <div className="dialog_options">
             <label className="dialog_option"><span>(F) Fullscreen</span><input type="checkbox" checked={fullscreenPreferred} onChange={toggleFullscreen} /></label>
-            <label className="dialog_option"><span>(O) Portrait</span><input type="checkbox" checked={portrait} onChange={(event) => setOrientationOverride(event.target.checked ? "portrait" : "landscape")} /></label>
             <label className="dialog_option"><span>(H) HUD</span><input type="checkbox" checked={hudVisible} onChange={(event) => setHudVisible(event.target.checked)} /></label>
             <button type="button" onClick={resetLocalStorage}>(T) Reset Local Storage</button>
           </div> : <div className="dialog_options"><div>v{versionNumber}</div><div>DPR: {devicePixelRatio}</div><div>{activeLayout.label ?? `${activeLayout.width}:${activeLayout.height}`} Aspect</div><div>{windowPixels.width}x{windowPixels.height} Window</div><div>{viewportPixels.width}x{viewportPixels.height} Viewport</div></div>}

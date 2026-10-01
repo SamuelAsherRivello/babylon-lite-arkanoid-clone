@@ -1,6 +1,6 @@
 # Neon Breaker Duo
 
-A portrait, two-player online brick breaker: share one board, return the ball together, and clear three neon sectors.
+A portrait-only, two-player online brick breaker: share one board, return the ball together, and clear three neon sectors. The 9:16 playfield scales to the available screen; players do not need to choose an orientation.
 
 ## Live Demo
 
