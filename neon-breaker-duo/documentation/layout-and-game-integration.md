@@ -4,9 +4,18 @@ The game uses a 320×576 logical playfield, matching the portrait 9:16 stage. Re
 
 ## Pixel-art rendering
 
-`src/content/babylon/config.js` pins the Babylon Lite WebGPU engine to one sample, enables premultiplied alpha, and loads textures with nearest minification/magnification and no mipmaps. `src/content/Content.jsx` creates an internal render target from the available device-pixel dimensions, maps the logical center `(160, 288)` to the center of that target, and presents the target at native canvas dimensions. Resizing and device-pixel-ratio changes rebuild the target. Sprite positions and sizes use logical playfield coordinates.
+There are four separate sizes in this pipeline:
 
-The game uses one responsive portrait 9:16 viewport (`src/ui/layout.js`) so its two-player lanes and shared playfield remain consistent across devices. There is no orientation toggle. The UI remains in React and stays reachable over the playfield. **O** opens settings; **P** pauses only the local display/input, leaving the shared server match active. The app requires WebGPU. If WebGPU is unavailable, the page displays an explanation and keeps the surrounding UI available.
+- **Logical scene:** 320×576 game units, used for sprite positions, sizes, and camera framing.
+- **Internal render target:** selected with the `(R)` control or R key from quarter, half, native, or double the native backing size. For example, a 640×1152 native backing gives 160×288, 320×576, 640×1152, and 1280×2304 targets.
+- **Canvas backing:** the viewport's CSS dimensions multiplied by device pixel ratio. Babylon Lite owns the canvas at this native DPR-aware size.
+- **CSS display:** the responsive portrait viewport measured in CSS pixels, which may be scaled to fit the browser window.
+
+`src/content/babylon/config.js` pins the Babylon Lite WebGPU engine to one sample, enables premultiplied alpha, and loads textures with nearest minification/magnification and no mipmaps. `src/content/Content.jsx` renders the logical scene to the selected internal target, maps logical center `(160, 288)` to that target's center, then presents it at the native canvas backing size using nearest-neighbor sampling. Resize and device-pixel-ratio changes recalculate dimensions; stale GPU resources are disposed before replacement. Upscaled targets are capped to the WebGPU device texture limit while preserving their aspect ratio, and the UI reports the resulting dimensions. A target allocation failure displays a recovery message while retaining the WebGPU-only path. Sprite positions and sizes remain in logical playfield coordinates.
+
+The HUD shows a compact render-resolution button below the game title. Its accessible label and Babylon Lite dialog show the active dimensions; Native is labeled explicitly. Clicking the control or pressing **R** cycles quarter → half → native → double → quarter. The preset is stored with the other local settings and recalculated after viewport or DPR changes.
+
+The game uses one responsive portrait 9:16 viewport (`src/ui/layout.js`) so both players can move across the full shared playfield. Their paddles may overlap horizontally; Player 1's center is y=490 and Player 2's is y=440. There is no orientation toggle. The UI remains in React and stays reachable over the playfield. **O** opens settings; **P** pauses only the local display/input, leaving the shared server match active. The app requires WebGPU. If WebGPU is unavailable, the page displays an explanation and keeps the surrounding UI available.
 
 ## Running and testing
 

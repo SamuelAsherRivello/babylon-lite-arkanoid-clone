@@ -4,7 +4,7 @@ A portrait-only, two-player online brick breaker: share one board, return the ba
 
 ## Live Demo
 
-- [Play Neon Breaker Duo](https://samuelasherrivello.github.io/babylon-lite-arkanoid-clone/)
+- [Play Neon Breaker Duo · Playtest v0.0.7](https://samuelasherrivello.github.io/babylon-lite-arkanoid-clone/)
 
 ## Table of Contents
 
@@ -43,11 +43,11 @@ The application requires WebGPU. Use a current browser and GPU configuration tha
 
 ## How to Play
 
-Both players defend the same bottom edge. Player 1 controls the left paddle lane and Player 2 the right. Either paddle can return the ball.
+Both players defend the same shared 320×576 playfield and can move their paddles across the full width, including to the same position. Player 1's paddle is at y=490 (50 pixels above the old bottom row); Player 2's is at y=440 (100 pixels above it). Either paddle can return a falling ball at its own row.
 
 | Action | Control |
 |---|---|
-| Move | A/D or left/right arrows; drag/touch inside your half of the playfield |
+| Move | A/D or left/right arrows; drag/touch anywhere across the playfield |
 | Launch a waiting ball | Space or **LAUNCH** |
 | Pause this device | P or **PAUSE**; your partner and shared match continue |
 | Resume | P or **RESUME** |
@@ -57,9 +57,9 @@ Clear three authored waves. Normal bricks award 10 points; reinforced bricks awa
 
 ## Multiplayer
 
-The shared Colyseus server owns paddle bounds, ball movement, collisions, bricks, scores, lives, powerups, waves and match outcomes. The local paddle is predicted from current input for immediate feedback, while remote paddle snapshots are interpolated across a short render buffer; these presentation steps never change server-owned collisions or scoring. The game supports two connected players. If both lanes are occupied, a third player sees the full-room state and can retry later. A late joiner receives the current board snapshot. A departing player's lane centers and becomes available; reconnecting creates a fresh anonymous player identity.
+The shared Colyseus server owns full-width paddle bounds, each paddle's y coordinate, ball movement, collisions, bricks, scores, lives, powerups, waves and match outcomes. The local paddle is predicted from current input for immediate feedback, while remote paddle snapshots are interpolated across a short render buffer; these presentation steps never change server-owned collisions or scoring. The game supports two connected players. A third player sees the full-room state and can retry later. A late joiner receives the current board snapshot. A departing player's paddle centers at its assigned y and becomes available; reconnecting creates a fresh anonymous player identity.
 
-Sessions are in-memory and ephemeral. They can reset after all players leave or during hosting/deployment interruptions. There are no accounts, persistent identity, durable scores, room codes, or offline single-player fallback. GitHub Pages serves the static frontend; the multiplayer backend runs separately at the secure endpoint configured above. The client is pinned to the [shared multiplayer client v0.8.0](https://github.com/SamuelAsherRivello/rmc-colyseus-multiplayer-server/releases/tag/v0.8.0).
+Sessions are in-memory and ephemeral. They can reset after all players leave or during hosting/deployment interruptions. There are no accounts, persistent identity, durable scores, room codes, or offline single-player fallback. GitHub Pages serves the static frontend; the multiplayer backend runs separately at the secure endpoint configured above. The client is pinned to the [shared multiplayer client v0.9.6](https://github.com/SamuelAsherRivello/rmc-colyseus-multiplayer-server/releases/tag/v0.9.6).
 
 ## Art and References
 
@@ -75,7 +75,7 @@ The identity, stage layout, board patterns, sprites, UI and title are original. 
 ## Project Details
 
 - `neon-breaker-duo/` is the React/Vite app; `neon-breaker-duo/src/content/` contains the Babylon Lite WebGPU renderer and sprite presentation.
-- `neon-breaker-duo/src/game/` contains network session state and lane input mapping.
+- `neon-breaker-duo/src/game/` contains network session state and full-width paddle input mapping.
 - `neon-breaker-duo/test/` covers app configuration, renderer setup, controls and Pages paths.
 - `openspec/changes/archive/2026-10-01-arkanoid-co-op-multiplayer/` contains the completed change and acceptance tasks.
 - [`@babylonjs/lite`](https://www.npmjs.com/package/@babylonjs/lite) provides the required Babylon Lite runtime; pixel-art textures use nearest sampling, no mipmaps, no MSAA, and DPR-aware integer scaling when the stage fits.

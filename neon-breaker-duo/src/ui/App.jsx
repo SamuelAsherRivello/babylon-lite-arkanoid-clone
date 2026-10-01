@@ -7,29 +7,10 @@ import { getRenderScaleDisplayText } from "../content/babylon/showcase-overlay.j
 import {
   cycleRenderResolutionPreset,
   getRenderResolutionDimensions,
-  isRenderResolutionPreset,
 } from "../content/babylon/render-resolution.js";
 import { ViewportInfoContext } from "./ViewportInfoContext.jsx";
-
-const configStorageKey = "neon-breaker-duo.config";
-const fullscreenStorageKey = "neon-breaker-duo.fullscreen";
-const defaultConfig = Object.freeze({ fullscreen: false, hudVisible: true, renderPreset: "native" });
+import { persistConfig, readConfig } from "./settings.js";
 const repositoryUrl = "https://github.com/SamuelAsherRivello/babylon-lite-arkanoid-clone";
-
-function readConfig() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(configStorageKey) ?? "null");
-    return {
-      fullscreen: typeof saved?.fullscreen === "boolean"
-        ? saved.fullscreen
-        : localStorage.getItem(fullscreenStorageKey) === "true",
-      hudVisible: typeof saved?.hudVisible === "boolean" ? saved.hudVisible : defaultConfig.hudVisible,
-      renderPreset: isRenderResolutionPreset(saved?.renderPreset) ? saved.renderPreset : defaultConfig.renderPreset,
-    };
-  } catch {
-    return defaultConfig;
-  }
-}
 
 export function Corner({ position, children }) {
   return <div className={`corner corner_${position}`}>{children}</div>;
@@ -73,6 +54,13 @@ export function App({ layout = defaultLayout, content = null, gutters = {} }) {
   const renderResolutionText = renderResolutionInfo.width > 0
     ? `(R) RenderResolution: ${renderResolutionInfo.width}x${renderResolutionInfo.height}${renderPreset === "native" ? " (Native)" : ""}`
     : "(R) RenderResolution: measuring…";
+  const renderResolutionShortText = renderResolutionInfo.width > 0
+    ? `(R) ${renderResolutionInfo.width}x${renderResolutionInfo.height}${renderPreset === "native" ? " NATIVE" : ""}`
+    : "(R) measuring…";
+  const cycleRenderPreset = () => setConfig((current) => ({
+    ...current,
+    renderPreset: cycleRenderResolutionPreset(current.renderPreset),
+  }));
   const updateViewportPixels = useCallback((rect) => {
     setViewportPixels((current) => {
       const next = { width: Math.round(rect.width), height: Math.round(rect.height) };
@@ -101,10 +89,7 @@ export function App({ layout = defaultLayout, content = null, gutters = {} }) {
       if (key === "t") resetLocalStorage();
       if (key === "v") setActiveDialog((dialog) => dialog === "stats" ? null : "stats");
       if (key === "b") setActiveDialog((dialog) => dialog === "babylon" ? null : "babylon");
-      if (key === "r" && !event.repeat) setConfig((current) => ({
-        ...current,
-        renderPreset: cycleRenderResolutionPreset(current.renderPreset),
-      }));
+      if (key === "r" && !event.repeat) cycleRenderPreset();
       if (event.key === "Escape") setActiveDialog(null);
     };
     window.addEventListener("keydown", handleShortcut);
@@ -112,12 +97,7 @@ export function App({ layout = defaultLayout, content = null, gutters = {} }) {
   });
 
   useEffect(() => {
-    try {
-      localStorage.setItem(configStorageKey, JSON.stringify(config));
-      localStorage.setItem(fullscreenStorageKey, config.fullscreen ? "true" : "false");
-    } catch {
-      // Keep the in-memory React settings usable when browser storage is unavailable.
-    }
+    persistConfig(config);
   }, [config]);
 
   useEffect(() => {
@@ -166,7 +146,10 @@ export function App({ layout = defaultLayout, content = null, gutters = {} }) {
       processingPaused: activeDialog !== null,
     }}>
     <BrowserSurface layout={activeLayout} gutters={gutters} onViewportResize={updateViewportPixels} ui={<>
-      {hudVisible && <Corner position="top_left"><div id="project_title" className="corner-title">NEON BREAKER DUO</div></Corner>}
+      {hudVisible && <Corner position="top_left">
+        <div id="project_title" className="corner-title">NEON BREAKER DUO</div>
+        <button id="render_resolution" className="corner-body corner_role_button render_resolution_button" type="button" onClick={cycleRenderPreset} aria-label={renderResolutionText} title={renderResolutionText}>{renderResolutionShortText}</button>
+      </Corner>}
       {hudVisible && <Corner position="top_right">
         <a className="corner-body" href={repositoryUrl} target="_blank" rel="noopener noreferrer" aria-label="View the repository on GitHub" tabIndex={-1}>
           <GitHubMark />
@@ -177,7 +160,7 @@ export function App({ layout = defaultLayout, content = null, gutters = {} }) {
         <section id="stats" aria-labelledby="stats_title"><button id="stats_title" className="corner-body corner_role_button" type="button" onClick={() => setActiveDialog("stats")}>(V) v<span id="version">{versionNumber}</span></button></section>
       </Corner>}
       {activeDialog && <Dialog title={activeDialog === "config" ? "Config" : activeDialog === "babylon" ? "Babylon Lite" : "Stats"} className={activeDialog === "babylon" ? "babylon_settings_dialog" : ""} onClose={() => setActiveDialog(null)}>
-          {activeDialog === "babylon" ? <div className="dialog_options babylon_settings"><div>Babylon Lite</div><div>{renderResolutionText}</div><div>{getRenderScaleDisplayText(renderScale)}</div><div>Mode: 2DPixelPerfect</div></div>
+          {activeDialog === "babylon" ? <div className="dialog_options babylon_settings"><div>Babylon Lite</div><button type="button" className="corner_role_button" onClick={cycleRenderPreset} aria-label={renderResolutionText} title="Click or press R to cycle">{renderResolutionText}</button><div>{getRenderScaleDisplayText(renderScale)}</div><div>Mode: 2DPixelPerfect</div></div>
             : activeDialog === "config" ? <div className="dialog_options">
             <label className="dialog_option"><span>(F) Fullscreen</span><input type="checkbox" checked={fullscreenPreferred} onChange={toggleFullscreen} /></label>
             <label className="dialog_option"><span>(H) HUD</span><input type="checkbox" checked={hudVisible} onChange={(event) => setHudVisible(event.target.checked)} /></label>

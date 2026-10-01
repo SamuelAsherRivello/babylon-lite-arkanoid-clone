@@ -383,6 +383,7 @@ body {
 .neon_game { background-color: #080c25; background-position: center; background-size: 100% 100%; image-rendering: pixelated; color: #eafaff; font-family: "Courier New", monospace; }
 .neon_game .babylon_canvas { pointer-events: none; image-rendering: pixelated; }
 .corner_role_button { border: 1px solid #2675a8; padding: 3px 6px; background: #080c25cc; color: #b8d5ff; font: inherit; cursor: pointer; text-decoration: none; }
+.render_resolution_button { display: block; max-width: 100%; margin-top: 2px; padding: 2px 4px; font: 6px/1.2 "Courier New", monospace; white-space: nowrap; }
 .corner_role_button:hover, .corner_role_button:focus-visible { color: #fff; border-color: #55f0d0; outline: none; }
 .game-hud { position: absolute; top: 31px; left: 8px; right: 8px; display: flex; justify-content: space-between; color: #eafaff; font: 700 8px/1 "Courier New", monospace; letter-spacing: .04em; text-shadow: 1px 1px #080c25; pointer-events: none; }
 .game-controls { position: absolute; z-index: 2; top: 45px; left: 5px; right: 5px; display: flex; align-items: center; justify-content: space-between; gap: 3px; color: #d9efff; font: 700 6px/1 "Courier New", monospace; pointer-events: none; }

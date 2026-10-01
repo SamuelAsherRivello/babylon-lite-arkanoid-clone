@@ -9,12 +9,12 @@ context: |
   corner roles and local run/test/build scripts. Portrait stage 320x576, crisp
   nearest-sampled 2D art with integer scaling when it fits and documented
   fractional fit otherwise. Two players share one authoritative board, score,
-  lives and progression; each controls a distinct paddle lane. The server
+  lives and progression; both paddles move freely across the full width and may overlap at fixed y=490 and y=440. The server
   validates bounded paddle input and owns simulation, collisions, bricks,
   powerups and match transitions. Shared-client state must be pinned to a
   verified released package. The sibling rmc-colyseus-multiplayer-server
-  currently tracks main at 52346b0b0e992e485def2ccde5a3ba8ec2559ae9; this app
-  uses its verified v0.8.0 client release and isolated neon-breaker-duo room.
+  has released the full-width paddle game contract in v0.9.6; this app
+  uses its verified v0.9.6 client release and isolated neon-breaker-duo room.
   GitHub Pages base is /babylon-lite-arkanoid-clone/; production backend URL
   is configurable and must use the public secure endpoint. No credentials in
   browser code. Anonymous identities are ephemeral; sessions are in-memory,

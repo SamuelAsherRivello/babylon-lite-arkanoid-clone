@@ -22,11 +22,12 @@ The game MUST maintain one authoritative board, score, three shared lives, and t
 - **THEN** all clients see victory or defeat, and an explicit restart begins a clean match with three lives and zero score
 
 ### Requirement: Two-seat cooperative paddle control
-A match MUST admit at most two connected human players, assign one distinct fixed half-lane paddle to each, and accept only bounded input from that paddle's owner. Either paddle MUST be able to return a ball. Clients MUST NOT choose shared outcomes, scoring, collisions, brick damage, powerup effects, or match transitions.
+A match MUST admit at most two connected human players. Each player MUST control an owner-bound paddle that can move across the full board width, and the paddles MAY overlap. Player 1's paddle MUST be at y=490 and Player 2's at y=440 on the 320×576 board. Either paddle MUST be able to return a ball at its own row. Clients MUST NOT choose shared outcomes, scoring, collisions, brick damage, powerup effects, or match transitions.
 
-#### Scenario: Players control their assigned lanes
+#### Scenario: Players control the full board width
 - **WHEN** both seats are occupied and either player moves their paddle
-- **THEN** only that player's bounded lane position changes and both clients observe the authoritative position
+- **THEN** only that player's bounded full-width position changes and both clients observe its x and y coordinates
+- **AND** both paddles may overlap at the same x coordinate
 
 #### Scenario: Third player attempts to join
 - **WHEN** both seats are occupied
@@ -59,11 +60,11 @@ Online play MUST use the public `neon-breaker-duo` game session without room cod
 - **THEN** their paddle centers, the remaining player continues, and the vacant seat can be filled by a fresh anonymous identity
 
 ### Requirement: Playable input and recovery
-The game MUST provide keyboard A/D or left/right movement and pointer/touch drag within each assigned lane, a visible launch control, local pause/resume, and shared restart controls after match completion. Input MUST be released on blur, pointer cancellation, and teardown. The README MUST give exact install, launch, control, player-capacity, reconnect, and hosting-limit instructions.
+The game MUST provide keyboard A/D or left/right movement and pointer/touch drag across the full playfield, a visible launch control, local pause/resume, and shared restart controls after match completion. Input MUST be released on blur, pointer cancellation, and teardown. The README MUST give exact install, launch, control, player-capacity, reconnect, and hosting-limit instructions.
 
 #### Scenario: Player launches and moves
 - **WHEN** a player presses Space or activates the visible launch control, then moves with keyboard or pointer
-- **THEN** the server launches a ball when eligible and applies only bounded input to that player's lane
+- **THEN** the server launches a ball when eligible and applies only bounded input to that player's full-width paddle
 
 #### Scenario: Rendering cannot initialize
 - **WHEN** WebGPU is unavailable or initialization fails

@@ -10,10 +10,11 @@ export function GameSessionProvider({ children }) {
     const endpoint=import.meta.env.VITE_MULTIPLAYER_URL || (import.meta.env.DEV?'http://127.0.0.1:2567':'https://rmc-colyseus-multiplayer-server.vercel.app');
     const client=new MultiplayerClient(endpoint,'neon-breaker-duo'); clientRef.current=client;
     const unsubscribe=client.subscribe(next=>setState({...next,players:[...(next.players||[])],gameState:next.gameState}));
-    void client.connect();
+    let active=true;
+    const connectTimer=window.setTimeout(()=>{if(active)void client.connect();},0);
     const blur=()=>{client.send('input',{x:.5});};
     window.addEventListener('blur',blur); document.addEventListener('visibilitychange',blur);
-    return ()=>{window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',blur);unsubscribe();client.disconnect();clientRef.current=null;};
+    return ()=>{active=false;window.clearTimeout(connectTimer);window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',blur);unsubscribe();client.disconnect();clientRef.current=null;};
   },[]);
   const send=useCallback((kind,payload)=>clientRef.current?.send(kind,payload),[]);
   const retry=useCallback(()=>clientRef.current?.connect(),[]);

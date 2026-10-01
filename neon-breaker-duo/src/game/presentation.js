@@ -40,11 +40,10 @@ export function samplePaddlePositions(history, sampleAt) {
   });
 }
 
-export function laneTargetX(seat, lanePosition) {
-  if (seat !== 0 && seat !== 1) return 160;
-  const lo = seat === 0 ? 20 : 180;
-  const x = Number.isFinite(lanePosition) ? Math.max(0, Math.min(1, lanePosition)) : 0.5;
-  return lo + x * 120;
+export function paddleTargetX(input, width = 38, boardWidth = 320) {
+  const x = Number.isFinite(input) ? Math.max(0, Math.min(1, input)) : 0.5;
+  const half = Math.max(0, width) / 2;
+  return half + x * (boardWidth - half * 2);
 }
 
 export function advancePaddleTowardTarget(position, target, elapsedSeconds, speed = 260) {
