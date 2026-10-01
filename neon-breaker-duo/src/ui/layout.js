@@ -1,13 +1,13 @@
 // Change these presets to update the template's supported aspect ratios in one place.
-// Layout dimensions are CSS pixels; renderer resolution and DPR belong to a future integration.
+// The portrait stage follows the game logical dimensions; renderer resolution and DPR remain managed by Babylon Lite.
 export const aspectRatioPresets = Object.freeze({
   landscape: Object.freeze({ width: 16, height: 9, label: "16:9" }),
   portrait: Object.freeze({ width: 9, height: 16, label: "9:16" }),
 });
 
 export const defaultLayout = Object.freeze({
-  orientation: "landscape",
-  ...aspectRatioPresets.landscape,
+  orientation: "portrait",
+  ...aspectRatioPresets.portrait,
 });
 
 export function validateLayout(layout) {
@@ -35,3 +35,5 @@ export function fitViewport(surfaceWidth, surfaceHeight, layout) {
   const height = width / ratio;
   return { width, height, x: (surfaceWidth - width) / 2, y: (surfaceHeight - height) / 2 };
 }
+
+

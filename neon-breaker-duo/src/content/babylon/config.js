@@ -4,7 +4,7 @@ export const contentConfig = Object.freeze({
 });
 
 export const pixelPerfectOptions = Object.freeze({
-  engine: Object.freeze({ msaaSamples: 1 }),
+  engine: Object.freeze({ msaaSamples: 1, alphaMode: "premultiplied" }),
   texture: Object.freeze({
     addressModeU: "clamp-to-edge",
     addressModeV: "clamp-to-edge",
@@ -14,10 +14,12 @@ export const pixelPerfectOptions = Object.freeze({
   }),
 });
 
-export const logicalResolution = Object.freeze({ width: 320, height: 180 });
-export const showcaseTileSize = 32;
+export const logicalResolution = Object.freeze({ width: 320, height: 576 });
+export const showcaseTileSize = 16;
 
 export function getRenderingPolicy({ renderer, style }) {
   if (renderer !== "babylon-lite") return "renderer-specific";
   return style === "2d" ? "pixel-perfect" : style === "3d" ? "performance-scaled-3d" : "renderer-specific";
 }
+
+

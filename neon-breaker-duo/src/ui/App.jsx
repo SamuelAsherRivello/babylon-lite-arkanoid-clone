@@ -4,7 +4,6 @@ import { BrowserSurface } from "./BrowserSurface.jsx";
 import { aspectRatioPresets, defaultLayout } from "./layout.js";
 import { Dialog } from "./Dialog.jsx";
 import { getRenderScaleDisplayText } from "../content/babylon/showcase-overlay.js";
-import babylonLogoUrl from "../content/babylon/images/babylon_logo_32x32.png?url";
 import {
   cycleRenderResolutionPreset,
   getRenderResolutionDimensions,
@@ -12,10 +11,10 @@ import {
 } from "../content/babylon/render-resolution.js";
 import { ViewportInfoContext } from "./ViewportInfoContext.jsx";
 
-const configStorageKey = "github-repository-template.config";
-const fullscreenStorageKey = "github-repository-template.fullscreen";
+const configStorageKey = "neon-breaker-duo.config";
+const fullscreenStorageKey = "neon-breaker-duo.fullscreen";
 const defaultConfig = Object.freeze({ fullscreen: false, orientation: null, hudVisible: true, renderPreset: "native" });
-const repositoryUrl = "https://github.com/SamuelAsherRivello/github-repository-template";
+const repositoryUrl = "https://github.com/SamuelAsherRivello/babylon-lite-arkanoid-clone";
 
 function readConfig() {
   try {
@@ -105,7 +104,7 @@ export function App({ layout = defaultLayout, content = null, gutters = {} }) {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
       const key = event.key.toLowerCase();
       if (key === "f") toggleFullscreen();
-      if (key === "p") setConfig((current) => ({ ...current, orientation: current.orientation === "portrait" ? "landscape" : "portrait" }));
+      if (key === "o") setConfig((current) => ({ ...current, orientation: current.orientation === "portrait" ? "landscape" : "portrait" }));
       if (key === "h") setConfig((current) => ({ ...current, hudVisible: !current.hudVisible }));
       if (key === "t") resetLocalStorage();
       if (key === "c") setActiveDialog((dialog) => dialog === "config" ? null : "config");
@@ -176,47 +175,21 @@ export function App({ layout = defaultLayout, content = null, gutters = {} }) {
       processingPaused: activeDialog !== null,
     }}>
     <BrowserSurface layout={activeLayout} gutters={gutters} onViewportResize={updateViewportPixels} ui={<>
-      {hudVisible && <div className="babylon_viewport_info" aria-label="Babylon Lite viewport settings">
-        <img className="babylon_viewport_logo" src={babylonLogoUrl} alt="" aria-hidden="true" />
-        <div className="corner-title"><button className="babylon_viewport_info_button" type="button" onClick={() => setActiveDialog("babylon")} aria-label="Open Babylon Lite settings">(B)</button> Babylon Lite</div>
-        <div className="corner-body"><button className="babylon_viewport_info_button" type="button" onClick={() => setConfig((current) => ({ ...current, renderPreset: cycleRenderResolutionPreset(current.renderPreset) }))} aria-label={`Cycle render resolution, currently ${renderResolutionInfo.width} by ${renderResolutionInfo.height}`}>{renderResolutionText}</button></div>
-        <div className="corner-body">{getRenderScaleDisplayText(renderScale)}</div>
-        <div className="corner-body">Mode: 2DPixelPerfect</div>
-      </div>}
-      {hudVisible && <Corner position="top_left">
-        <div id="project_title" className="corner-body">
-          GitHub Repository Template
-        </div>
-      </Corner>}
+      {hudVisible && <Corner position="top_left"><div id="project_title" className="corner-title">NEON BREAKER DUO</div></Corner>}
       {hudVisible && <Corner position="top_right">
         <a className="corner-body" href={repositoryUrl} target="_blank" rel="noopener noreferrer" aria-label="View the repository on GitHub" tabIndex={-1}>
           <GitHubMark />
         </a>
       </Corner>}
-      {hudVisible && <Corner position="bottom_left">
-        <section id="config" aria-labelledby="config_title">
-          <div id="config_title" className="corner-title">(C) Config</div>
-          {hudVisible && <label className="corner-body corner_option"><span>(F) Fullscreen</span><input id="fullscreen_toggle" type="checkbox" checked={fullscreenPreferred} onChange={toggleFullscreen} /></label>}
-          {hudVisible && <label className="corner-body corner_option"><span>(P) Portrait</span><input id="portrait_checkbox" type="checkbox" checked={portrait} onChange={(event) => setOrientationOverride(event.target.checked ? "portrait" : "landscape")} /></label>}
-          <label className="corner-body corner_option"><span>(H) HUD</span><input id="hud_checkbox" type="checkbox" checked={hudVisible} onChange={(event) => setHudVisible(event.target.checked)} /></label>
-          <button className="corner-body corner_option" type="button" onClick={resetLocalStorage}>(T) Reset Local Storage</button>
-        </section>
-      </Corner>}
+      {hudVisible && <Corner position="bottom_left"><button id="config" className="corner-body corner_role_button" type="button" onClick={() => setActiveDialog("config")}>(O) SETTINGS</button></Corner>}
       {hudVisible && <Corner position="bottom_right">
-        <section id="stats" aria-labelledby="stats_title">
-          <div id="stats_title" className="corner-title">(V) Stats</div>
-          <div id="version" className="corner-body">v{versionNumber}</div>
-          <div className="corner-body">DPR: {devicePixelRatio}</div>
-          <div id="aspect_ratio" className="corner-body">{activeLayout.label ?? `${activeLayout.width}:${activeLayout.height}`} Aspect</div>
-          <div className="corner-body">{windowPixels.width}x{windowPixels.height} Window</div>
-          <div className="corner-body">{viewportPixels.width}x{viewportPixels.height} Viewport</div>
-        </section>
+        <section id="stats" aria-labelledby="stats_title"><button id="stats_title" className="corner-body corner_role_button" type="button" onClick={() => setActiveDialog("stats")}>(V) v<span id="version">{versionNumber}</span></button></section>
       </Corner>}
       {activeDialog && <Dialog title={activeDialog === "config" ? "Config" : activeDialog === "babylon" ? "Babylon Lite" : "Stats"} className={activeDialog === "babylon" ? "babylon_settings_dialog" : ""} onClose={() => setActiveDialog(null)}>
           {activeDialog === "babylon" ? <div className="dialog_options babylon_settings"><div>Babylon Lite</div><div>{renderResolutionText}</div><div>{getRenderScaleDisplayText(renderScale)}</div><div>Mode: 2DPixelPerfect</div></div>
             : activeDialog === "config" ? <div className="dialog_options">
             <label className="dialog_option"><span>(F) Fullscreen</span><input type="checkbox" checked={fullscreenPreferred} onChange={toggleFullscreen} /></label>
-            <label className="dialog_option"><span>(P) Portrait</span><input type="checkbox" checked={portrait} onChange={(event) => setOrientationOverride(event.target.checked ? "portrait" : "landscape")} /></label>
+            <label className="dialog_option"><span>(O) Portrait</span><input type="checkbox" checked={portrait} onChange={(event) => setOrientationOverride(event.target.checked ? "portrait" : "landscape")} /></label>
             <label className="dialog_option"><span>(H) HUD</span><input type="checkbox" checked={hudVisible} onChange={(event) => setHudVisible(event.target.checked)} /></label>
             <button type="button" onClick={resetLocalStorage}>(T) Reset Local Storage</button>
           </div> : <div className="dialog_options"><div>v{versionNumber}</div><div>DPR: {devicePixelRatio}</div><div>{activeLayout.label ?? `${activeLayout.width}:${activeLayout.height}`} Aspect</div><div>{windowPixels.width}x{windowPixels.height} Window</div><div>{viewportPixels.width}x{viewportPixels.height} Viewport</div></div>}
@@ -225,3 +198,6 @@ export function App({ layout = defaultLayout, content = null, gutters = {} }) {
     </ViewportInfoContext.Provider>
   );
 }
+
+
+

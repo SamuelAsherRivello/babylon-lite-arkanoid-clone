@@ -1,15 +1,16 @@
 {
-  "name": "github-repository-template",
+  "name": "babylon-lite-arkanoid-clone",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test --test-isolation=none project-name/test/page.test.mjs project-name/test/content.test.mjs project-name/test/openspec-skills.test.mjs"
+    "test": "node --test --test-isolation=none neon-breaker-duo/test/page.test.mjs neon-breaker-duo/test/content.test.mjs neon-breaker-duo/test/game-rules.test.mjs"
   },
   "dependencies": {
     "@babylonjs/lite": "1.32.0",
+    "@rmc/multiplayer-client": "https://github.com/SamuelAsherRivello/rmc-colyseus-multiplayer-server/releases/download/v0.8.0/rmc-multiplayer-client-0.8.0.tgz",
     "@vitejs/plugin-react": "^6.1.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"

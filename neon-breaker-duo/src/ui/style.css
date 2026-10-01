@@ -371,3 +371,25 @@ body {
     linear-gradient(-45deg, transparent 54%, var(--surface-color) 54% 64%, transparent 64%),
     var(--text-color);
 }
+
+:root {
+  --gutter-color: #07091d;
+  --surface-color: #080c25;
+  --text-color: #b8d5ff;
+  --border-color: #2675a8;
+}
+#browser_surface { background-color: #07091d; background-image: radial-gradient(ellipse at 50% 50%, #15214b 0%, #07091d 70%); }
+#viewport { background: #080c25; box-shadow: 0 0 18px #11589688, inset 0 0 0 1px #2675a8; }
+.neon_game { background-color: #080c25; background-position: center; background-size: 100% 100%; image-rendering: pixelated; color: #eafaff; font-family: "Courier New", monospace; }
+.neon_game .babylon_canvas { pointer-events: none; image-rendering: pixelated; }
+.corner_role_button { border: 1px solid #2675a8; padding: 3px 6px; background: #080c25cc; color: #b8d5ff; font: inherit; cursor: pointer; text-decoration: none; }
+.corner_role_button:hover, .corner_role_button:focus-visible { color: #fff; border-color: #55f0d0; outline: none; }
+.game-hud { position: absolute; top: 31px; left: 8px; right: 8px; display: flex; justify-content: space-between; color: #eafaff; font: 700 8px/1 "Courier New", monospace; letter-spacing: .04em; text-shadow: 1px 1px #080c25; pointer-events: none; }
+.game-controls { position: absolute; z-index: 2; top: 45px; left: 5px; right: 5px; display: flex; align-items: center; justify-content: space-between; gap: 3px; color: #d9efff; font: 700 6px/1 "Courier New", monospace; pointer-events: none; }
+.game-controls button, .game-notice button { border: 1px solid #55f0d0; background: #0a1b39ed; color: #eaffff; padding: 5px 6px; font: 700 7px/1 "Courier New", monospace; cursor: pointer; pointer-events: auto; }
+.game-controls button:hover, .game-notice button:hover { background: #174c68; }
+.game-notice { position: absolute; z-index: 3; top: 44%; left: 50%; transform: translate(-50%,-50%); display: grid; justify-items: center; gap: 10px; width: min(84%,260px); padding: 15px 10px; border: 2px solid #55f0d0; background: #080c25ed; color: #eaffff; text-align: center; box-shadow: 0 0 16px #26d9f077; font: 9px/1.4 "Courier New", monospace; }
+.game-notice strong { color: #ff83df; font-size: 13px; letter-spacing: .08em; }
+.pause-tag { position: absolute; z-index: 3; top: 48%; left: 50%; transform: translate(-50%,-50%); max-width: 80%; padding: 8px; background: #080c25e8; color: #ffd44f; text-align: center; font: 700 8px "Courier New", monospace; pointer-events: none; }
+.babylon_content_message { background: #080c25; color: #ffd44f; }
+@media (max-width: 420px) { .game-controls { font-size: 5px; } .game-controls button { padding: 4px 3px; font-size: 6px; } .game-hud { font-size: 7px; } }

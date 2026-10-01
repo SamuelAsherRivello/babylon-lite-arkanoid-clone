@@ -6,12 +6,13 @@ import { defineConfig } from "vite";
 const repositoryRoot = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  base: "/github-repository-template/",
+  base: "/babylon-lite-arkanoid-clone/",
   plugins: [react()],
-  root: "project-name",
+  root: "neon-breaker-duo",
   server: {
     fs: {
       allow: [repositoryRoot],
     },
   },
 });
+

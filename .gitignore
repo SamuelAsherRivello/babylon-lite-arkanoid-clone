@@ -2,7 +2,7 @@
 
 # Node and Vite output.
 node_modules/
-/project-name/dist/
+/neon-breaker-duo/dist/
 
 # Local configuration. Commit examples only, never credentials.
 .env

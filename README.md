@@ -1,128 +1,120 @@
-<!-- AI: Keep commands rooted at the repository. The Vite application, source, tests, and build output belong in project-name/. -->
-![Samuel Asher Rivello](project-name/documentation/samuel-asher-rivello-banner.png)
+# Neon Breaker Duo
 
-# {project-name}
-
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
-
-<!-- AI: Update this project summary when the template is used. -->
-This is the project repo....
-
-## Images
-
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
-
-### Screenshots
-
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
-
-<a href="project-name/documentation/screenshot01.png"><img src="project-name/documentation/screenshot01.png" width="400" alt="Screenshot placeholder" /></a>
+A portrait, two-player online brick breaker: share one board, return the ball together, and clear three neon sectors.
 
 ## Live Demo
 
-<!-- AI: Keep exactly one bullet containing the demo link and no other visible text. Do not mention releases or add other text here. Keep this one link updated to the latest release URL. -->
-
-- [{live-demo-url}](https://samuelasherrivello.github.io/github-repository-template/)
+- [Play Neon Breaker Duo](https://samuelasherrivello.github.io/babylon-lite-arkanoid-clone/)
 
 ## Table of Contents
 
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
-
-<!-- AI: Do not include anything above the Table of Contents within the Table of Contents. -->
 1. [Getting Started](#getting-started)
-2. [Project Details](#project-details)
-3. [Credits](#credits)
+2. [How to Play](#how-to-play)
+3. [Multiplayer](#multiplayer)
+4. [Art and References](#art-and-references)
+5. [Project Details](#project-details)
+6. [Original AI Prompt](#original-ai-prompt)
+7. [Credits](#credits)
 
 ## Getting Started
 
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
+The shared online server is already deployed; two players can connect from separate browser tabs or devices.
 
-<!-- AI: Update this getting-started summary when the template is used. -->
-This is the getting started...
+### Run the game
 
-### 🛠 Build Project
+From the repository root, install dependencies and start Vite:
 
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
+```powershell
+npm install
+$env:VITE_MULTIPLAYER_URL = "https://rmc-colyseus-multiplayer-server.vercel.app"
+npm run dev
+```
 
-1. From the repository root, run `npm install`.
-2. Run `npm run build`.
+Open the localhost address printed by Vite in two independent browser sessions and play together. To use a locally running backend, set `VITE_MULTIPLAYER_URL` to its URL (the shared server defaults to `http://127.0.0.1:2567`) before starting Vite.
 
-### 🛠 Run Project
+Run checks and produce the GitHub Pages build from the repository root:
 
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
+```powershell
+npm test
+npm run build
+```
 
-1. From the repository root, run `npm run dev` and open the localhost URL Vite prints.
-2. Run `npm test` to execute the focused source checks.
+The application requires WebGPU. Use a current browser and GPU configuration that supports WebGPU; if unavailable, the page explains the limitation.
 
-### 🛠 Release Version
+## How to Play
 
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
+Both players defend the same bottom edge. Player 1 controls the left paddle lane and Player 2 the right. Either paddle can return the ball.
 
-1. Run `npm test` and `npm run build` from the repository root.
-2. Push to `main` to deploy through the GitHub Pages workflow.
-3. Run the **Release** workflow from GitHub Actions to bump the patch version, tag it, and create the GitHub release.
+| Action | Control |
+|---|---|
+| Move | A/D or left/right arrows; drag/touch inside your half of the playfield |
+| Launch a waiting ball | Space or **LAUNCH** |
+| Pause this device | P or **PAUSE**; your partner and shared match continue |
+| Resume | P or **RESUME** |
+| Restart after the team wins or loses | **PLAY AGAIN** / **RESTART** |
+
+Clear three authored waves. Normal bricks award 10 points; reinforced bricks award 25. The team shares three lives. A powerup drops from a broken brick at a one-in-eight chance: wide paddles last eight seconds, while multiball adds a ball up to a cap of three.
+
+## Multiplayer
+
+The shared Colyseus server owns paddle bounds, ball movement, collisions, bricks, scores, lives, powerups, waves and match outcomes. The game supports two connected players. If both lanes are occupied, a third player sees the full-room state and can retry later. A late joiner receives the current board snapshot. A departing player's lane centers and becomes available; reconnecting creates a fresh anonymous player identity.
+
+Sessions are in-memory and ephemeral. They can reset after all players leave or during hosting/deployment interruptions. There are no accounts, persistent identity, durable scores, room codes, or offline single-player fallback. GitHub Pages serves the static frontend; the multiplayer backend runs separately at the secure endpoint configured above. The client is pinned to the [shared multiplayer client v0.8.0](https://github.com/SamuelAsherRivello/rmc-colyseus-multiplayer-server/releases/tag/v0.8.0).
+
+## Art and References
+
+<a href="neon-breaker-duo/documentation/neon-space-background.png"><img src="neon-breaker-duo/documentation/neon-space-background.png" width="400" alt="Original generated space background artwork for Neon Breaker Duo" /></a>
+
+- [Arkanoid: Revenge of Doh](https://en.wikipedia.org/wiki/Arkanoid:_Revenge_of_Doh) — primary gameplay reference for paddle-and-ball brick breaking and arcade progression.
+- [itch.io HTML5 Arkanoid games](https://itch.io/games/html5/tag-arkanoid) — optional gameplay research for browser presentation and control ideas; no game assets or code are included.
+- `neon-breaker-duo/documentation/neon-space-background.png` — original background generated for this project with OpenAI image generation.
+- `neon-breaker-duo/src/content/babylon/images/neon-brick-atlas.png` — original pixel-cluster atlas reproducibly generated by `neon-breaker-duo/documentation/generate-neon-atlas.mjs`; bricks, paddles, ball and powerups are not copied from reference games.
+
+The identity, stage layout, board patterns, sprites, UI and title are original. No third-party game artwork or audio is bundled; this version has no audio.
 
 ## Project Details
 
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
+- `neon-breaker-duo/` is the React/Vite app; `neon-breaker-duo/src/content/` contains the Babylon Lite WebGPU renderer and sprite presentation.
+- `neon-breaker-duo/src/game/` contains network session state and lane input mapping.
+- `neon-breaker-duo/test/` covers app configuration, renderer setup, controls and Pages paths.
+- `openspec/changes/arkanoid-co-op-multiplayer/` tracks the complete change and acceptance tasks.
+- [`@babylonjs/lite`](https://www.npmjs.com/package/@babylonjs/lite) provides the required Babylon Lite runtime; pixel-art textures use nearest sampling, no mipmaps, no MSAA, and DPR-aware integer scaling when the stage fits.
 
-<!-- AI: Update these project details when the template is used. -->
-This is the project details...
+## Original AI Prompt
 
-### 📝 Structure
+<details>
+<summary>Original request and follow-ups</summary>
 
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
+Original request:
 
-- `project-name/index.html` mounts the React browser surface; `project-name/src/` contains viewport, gutter, content, and UI composition.
-- [Layout and game integration](project-name/documentation/layout-and-game-integration.md) explains configuration and future renderer responsibilities.
-- `project-name/test/` contains focused automated checks for the starter.
-- `project-name/documentation/` contains canonical README images and project
-  documentation assets.
+```text
+update this game to be a multiplayer 2dpixelperfect clone of arkanoid
 
-### 📦 AI
+https://en.wikipedia.org/wiki/Arkanoid:_Revenge_of_Doh
+```
 
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
+Follow-up requirements:
 
-- `AGENTS.md` contains repository-specific AI agent guidance.
-- `AGENTS_TEMPLATE_USAGE_CHECKLIST.md` contains the template reuse checklist.
-- [openspec](openspec/) contains the repository's specification workflow
-  configuration.
+```text
+include any art reference and gameplayer references. finish the prompt setup
+update hte prompt finish it
+create a complete multiplayer game that launches from the README and is fully playable when complete
+Solve all your needs to run openspec, create proposal, apply it and finish
+```
 
-### 📦 Packages
+Optional reference supplied later:
 
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
+```text
+https://itch.io/games/html5/tag-arkanoid
+```
 
-- [Vite](https://vite.dev/) provides local development and production builds.
+These quoted messages preserve the supplied request. Decisions made to complete unspecified details are documented in the gameplay and multiplayer sections above.
 
+</details>
 
 ## Credits
 
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
+- Samuel Asher Rivello — over 25 years of game development experience (2026).
+- [GitHub](https://github.com/SamuelAsherRivello/) · [LinkedIn](https://Linkedin.com/in/SamuelAsherRivello)
+- Provided as-is under the [MIT License](LICENSE). Copyright © 2026 Rivello Multimedia Consulting, LLC.
 
-<!-- AI: Preserve established attribution and ownership. Customize the following subsections only from confirmed contributor, contact, and license information; do not infer a new owner from the repository name. -->
-### 💡 Contributors
-
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
-
-<!-- AI: Preserve existing contributor credit and add contributors only when confirmed. Do not automatically advance experience counts or their reference year. -->
-- Samuel Asher Rivello - Over 25 years of game development XP (2026)
-
-### 💡 Contact
-
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
-
-<!-- AI: Preserve confirmed contact destinations and their order unless requested otherwise. Use readable display URLs without a protocol or trailing slash while keeping the real link target intact. Do not invent accounts or change target capitalization based on display styling. -->
-- [LinkedIn.com/in/SamuelAsherRivello](https://Linkedin.com/in/SamuelAsherRivello) ⭐ 
-- [GitHub.com/SamuelAsherRivello](https://github.com/SamuelAsherRivello/)
-- [Twitter.com/srivello](https://twitter.com/srivello/)
-- Resume / Portfolio: [SamuelAsherRivello.com](http://www.SamuelAsherRivello.com)
-
-
-### 💡 License
-
-<!-- AI: Do not add more than one sentence of introductory text at the top of this section. -->
-
-<!-- AI: Keep the license name linked to the actual relative license file and verify that its terms match this statement. Keep the copyright holder and year consistent with that file. Do not change license terms, ownership, or dates without an explicit request. -->
-- Provided as-is under the [MIT License](LICENSE).
-
-- Copyright © 2026 Rivello Multimedia Consulting, LLC.

@@ -1,25 +1,33 @@
 schema: spec-driven
 context: |
-  Repository: github-repository-template, a reusable browser app/game template.
-  React and React DOM run through Vite with its React plugin. The repository
-  root is the npm root; project-name/ is the Vite application/source/test root.
-  Shared layout uses CSS pixels and a project-defined aspect-ratio viewport.
-  No game renderer is installed; engine guidance is comments/documentation only.
-  Add no runtime dependency without a concrete project requirement.
-  Preserve protected external links, version.txt sourcing, and fullscreen storage.
-  Commands from the repository root: npm ci, npm run dev, npm test, npm run build.
-  GitHub Pages uses /github-repository-template/ and project-name/dist/.
-  Canonical project documentation assets live in project-name/documentation/.
-  The template preserves only .agents/skills/.openspec-target; do not bundle
-  or hand-edit generated OpenSpec skills. Do not create a PR unless requested.
+  Repository: babylon-lite-arkanoid-clone; display title: Neon Breaker Duo.
+  Original portrait 2D online cooperative Arkanoid-inspired game for two players.
+  Start from the GitHub repository template at e526677d65c6bacee5cddd17189213cf565d90c9
+  and shared skills library at befef8e689341adf7b34ae89b9a665bc26ac1be8.
+  Use React, Vite, Babylon Lite 1.32.0 and WebGPU. Keep the npm project at root
+  and the Vite app under the renamed app directory. Preserve four template
+  corner roles and local run/test/build scripts. Portrait stage 320x576, crisp
+  nearest-sampled 2D art with integer scaling when it fits and documented
+  fractional fit otherwise. Two players share one authoritative board, score,
+  lives and progression; each controls a distinct paddle lane. The server
+  validates bounded paddle input and owns simulation, collisions, bricks,
+  powerups and match transitions. Shared-client state must be pinned to a
+  verified released package. The sibling rmc-colyseus-multiplayer-server
+  currently tracks main at 52346b0b0e992e485def2ccde5a3ba8ec2559ae9; this app
+  uses its verified v0.8.0 client release and isolated neon-breaker-duo room.
+  GitHub Pages base is /babylon-lite-arkanoid-clone/; production backend URL
+  is configurable and must use the public secure endpoint. No credentials in
+  browser code. Anonymous identities are ephemeral; sessions are in-memory,
+  may reset on deployment, and hosted sessions are short lived.
+  Use authored original game artwork and board layouts. Keep the actual
+  original user prompt separate from interpreted assumptions in the README.
 rules:
   proposal:
+    - State observable game and multiplayer behavior and acceptance criteria.
     - Mark unresolved decisions clearly; recommendations are not approvals.
-    - State the affected user behavior and acceptance criteria.
   design:
-    - Describe only architecture and technologies verified for this project.
-    - Preserve explicit boundaries between application layers or packages.
+    - Keep authoritative game rules independent from renderer and input.
+    - Keep server authoritative simulation separate from Babylon Lite rendering.
   tasks:
-    - Keep planning, implementation, and verification tasks explicit.
-    - Include focused checks appropriate to the implemented change.
-
+    - Keep planning, server implementation, client implementation and verification explicit.
+    - Include two-client local and public multiplayer verification.
