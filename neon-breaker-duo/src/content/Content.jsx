@@ -126,7 +126,7 @@ function PixelPerfectGame(){
         for(let i=0;i<12;i++)sprites.drops.push(addSprite2D(layer,{positionPx:[-40,-40],sizePx:[14,14],frame:5}));
         renderSurface=createRenderTargetSurfaceView(engine,320,576);
         renderer=createSpriteRenderer(renderSurface,{layers:[layer],clear:true,clearValue:transparent});setSpriteRendererTarget(renderer,null);registerSpriteRenderer(renderer);
-        if(!resize())return;await startEngine(engine);engineRunningRef.current=true;if(cancelled||disposed){disposeResources();return;}
+        if(!resize())return;engineRunningRef.current=true;await startEngine(engine);if(cancelled||disposed){disposeResources();return;}
         paintRef.current=paint;paint();resizeObserver=new ResizeObserver(resize);resizeObserver.observe(host);window.addEventListener('resize',resize);observeDpr();setMessage('');
       }catch(error){failInitialization(error);}
     };
