@@ -1,6 +1,8 @@
 // The room publishes at 20 Hz. Keep enough history in the past that ordinary
 // browser and network scheduling jitter still has a sample on both sides.
-export const REMOTE_PADDLE_INTERPOLATION_MS = 125;
+export const REMOTE_PADDLE_INTERPOLATION_MS = 150;
+const SNAPSHOT_INTERVAL_MS = 50;
+const MAX_REMOTE_PADDLE_INTERPOLATION_MS = 280;
 
 export function pushGameSnapshot(history, gameState, receivedAt, maxSamples = 8) {
   if (!gameState || !Number.isFinite(receivedAt) || maxSamples < 2) return history;
@@ -9,9 +11,24 @@ export function pushGameSnapshot(history, gameState, receivedAt, maxSamples = 8)
   const snapshot = { ...gameState, paddles: (gameState.paddles ?? []).map((paddle) => ({ ...paddle })) };
   const previous = history.at(-1);
   if (previous && receivedAt <= previous.receivedAt) receivedAt = previous.receivedAt + 0.01;
+  history.interarrivalJitterMs ??= 0;
+  history.interpolationDelayMs ??= REMOTE_PADDLE_INTERPOLATION_MS;
+  if (previous) {
+    const deviation = Math.abs(receivedAt - previous.receivedAt - SNAPSHOT_INTERVAL_MS);
+    history.interarrivalJitterMs += (deviation - history.interarrivalJitterMs) * 0.15;
+    const targetDelay = Math.min(MAX_REMOTE_PADDLE_INTERPOLATION_MS, REMOTE_PADDLE_INTERPOLATION_MS + history.interarrivalJitterMs * 2);
+    // React quickly to bad delivery and relax slowly, so the playback clock
+    // does not keep moving back and forth as individual packets arrive.
+    const response = targetDelay > history.interpolationDelayMs ? 0.25 : 0.03;
+    history.interpolationDelayMs += (targetDelay - history.interpolationDelayMs) * response;
+  }
   history.push({ receivedAt, gameState: snapshot });
   if (history.length > maxSamples) history.splice(0, history.length - maxSamples);
   return history;
+}
+
+export function getRemotePaddleInterpolationDelay(history) {
+  return history.interpolationDelayMs ?? REMOTE_PADDLE_INTERPOLATION_MS;
 }
 
 export function samplePaddlePositions(history, sampleAt) {

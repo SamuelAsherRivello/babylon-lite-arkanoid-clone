@@ -12,8 +12,8 @@ export function GameSessionProvider({ children }) {
     const endpoint=import.meta.env.VITE_MULTIPLAYER_URL || (import.meta.env.DEV?'http://127.0.0.1:2567':'https://rmc-colyseus-multiplayer-server.vercel.app');
     const client=new MultiplayerClient(endpoint,'neon-breaker-duo'); clientRef.current=client;
     const unsubscribe=client.subscribe((next,event)=>{
-      if(event==='status'&&!next.gameState)snapshotHistoryRef.current.length=0;
-      if(next.gameState&&(event==='snapshot'||event==='gameState'))pushGameSnapshot(snapshotHistoryRef.current,next.gameState,performance.now(),16);
+      if(event==='status'&&!next.gameState){snapshotHistoryRef.current.length=0;delete snapshotHistoryRef.current.interarrivalJitterMs;delete snapshotHistoryRef.current.interpolationDelayMs;}
+      if(next.gameState&&(event==='snapshot'||event==='gameState'))pushGameSnapshot(snapshotHistoryRef.current,next.gameState,performance.now(),32);
       setState({...next,players:[...(next.players||[])],gameState:next.gameState});
     });
     let active=true;
