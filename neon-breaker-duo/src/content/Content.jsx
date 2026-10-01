@@ -8,7 +8,7 @@ import { useViewportInfo } from '../ui/ViewportInfoContext.jsx';
 import { useGameSession } from '../game/GameSession.jsx';
 import { movePaddleInput, toPaddleInput } from '../game/controls.js';
 import {
-  advancePaddleTowardTarget, paddleTargetX, pushGameSnapshot,
+  advancePaddleTowardTarget, paddleTargetX,
   REMOTE_PADDLE_INTERPOLATION_MS, samplePaddlePositions,
 } from '../game/presentation.js';
 import { getInitializationMessage } from './babylon/initialization.js';
@@ -23,20 +23,19 @@ const spriteSize = Object.freeze({cellWidthPx:16,cellHeightPx:16,columns:8,rows:
 
 function PixelPerfectGame(){
   const {setScale,renderPreset,setRenderResolutionInfo,sceneBorderVisible,processingPaused}=useViewportInfo();
-  const {state,seat,send,paused,setPaused,retry}=useGameSession();
-  const hostRef=useRef(null),canvasRef=useRef(null),spriteStateRef=useRef(null),paintRef=useRef(null),resizeRef=useRef(()=>{}),engineRef=useRef(null),engineRunningRef=useRef(false),inputRef=useRef({x:.5,left:false,right:false}),snapshotBufferRef=useRef([]),localPaddleRef=useRef({seat:-1,x:null}),lastPaintAtRef=useRef(0),renderPresetRef=useRef(renderPreset);
+  const {state,seat,send,paused,setPaused,retry,snapshotHistory}=useGameSession();
+  const hostRef=useRef(null),canvasRef=useRef(null),spriteStateRef=useRef(null),paintRef=useRef(null),resizeRef=useRef(()=>{}),engineRef=useRef(null),engineRunningRef=useRef(false),inputRef=useRef({x:.5,left:false,right:false}),localPaddleRef=useRef({seat:-1,x:null}),lastInputAtRef=useRef(0),lastPaintAtRef=useRef(0),renderPresetRef=useRef(renderPreset);
   renderPresetRef.current=renderPreset;
   const snapshotAtRef=useRef(0);
   const [message,setMessage]=useState('Starting Babylon Lite…');
   const game=state.gameState;
   useEffect(()=>{
-    if(!game){spriteStateRef.current=null;snapshotBufferRef.current=[];localPaddleRef.current={seat:-1,x:null};return;}
+    if(!game){spriteStateRef.current=null;localPaddleRef.current={seat:-1,x:null};return;}
     const receivedAt=performance.now();spriteStateRef.current=game;snapshotAtRef.current=receivedAt;
-    pushGameSnapshot(snapshotBufferRef.current,game,receivedAt);
     const authoritative=game.paddles?.[seat];
     if(authoritative){
       if(localPaddleRef.current.seat!==seat||localPaddleRef.current.x===null)localPaddleRef.current={seat,x:authoritative.x};
-      else localPaddleRef.current.x+=Math.max(-4,Math.min(4,(authoritative.x-localPaddleRef.current.x)*.12));
+      else if(receivedAt-lastInputAtRef.current>180)localPaddleRef.current.x+=Math.max(-2,Math.min(2,(authoritative.x-localPaddleRef.current.x)*.08));
     }
   },[game,seat]);
 
@@ -49,8 +48,8 @@ function PixelPerfectGame(){
       const g=spriteStateRef.current;if(!g||!sprites.bricks.length)return;
       const now=performance.now(),elapsed=lastPaintAtRef.current?Math.min(.05,Math.max(0,(now-lastPaintAtRef.current)/1000)):0;lastPaintAtRef.current=now;
       const direction=Number(inputRef.current.right)-Number(inputRef.current.left);
-      if(direction)inputRef.current.x=movePaddleInput(inputRef.current.x,direction,.9*elapsed);
-      const remotePaddles=samplePaddlePositions(snapshotBufferRef.current,now-REMOTE_PADDLE_INTERPOLATION_MS);
+      if(direction){inputRef.current.x=movePaddleInput(inputRef.current.x,direction,.9*elapsed);lastInputAtRef.current=now;}
+      const remotePaddles=samplePaddlePositions(snapshotHistory,now-REMOTE_PADDLE_INTERPOLATION_MS);
       const put=(sprite,x,y,w,h,frame)=>updateSprite2D(sprite,{positionPx:[x,y],sizePx:[w,h],frame});
       sprites.bricks.forEach((sprite,i)=>{const b=g.bricks[i];put(sprite,b?b.x+b.w/2:-40,b?b.y+b.h/2:-40,b?.w??2,b?.h??2,b?.kind==='reinforced'?1:0);});
       sprites.paddles.forEach((sprite,i)=>{
@@ -147,7 +146,7 @@ function PixelPerfectGame(){
     window.addEventListener('keydown',down);window.addEventListener('keyup',up);window.addEventListener('blur',blur);
     return()=>{window.removeEventListener('keydown',down);window.removeEventListener('keyup',up);window.removeEventListener('blur',blur);blur();};
   },[send,setPaused]);
-  const pointerMove=e=>{if(state.status!=='connected'||paused)return;const r=hostRef.current.getBoundingClientRect(),u=(e.clientX-r.left)/r.width;inputRef.current.x=toPaddleInput(u);};
+  const pointerMove=e=>{if(state.status!=='connected'||paused)return;const r=hostRef.current.getBoundingClientRect(),u=(e.clientX-r.left)/r.width,next=toPaddleInput(u);if(next!==inputRef.current.x)lastInputAtRef.current=performance.now();inputRef.current.x=next;};
   const label=state.status==='full'?'Both paddle positions are occupied. Retry when a player leaves.':state.status==='connected'?'Connected — waiting for the shared board…':state.error||'Connecting to the shared game…';
   return <div ref={hostRef} className="babylon_content neon_game" style={{backgroundImage:`url(${spaceUrl})`}} onPointerDown={e=>{if(!e.target.closest('button')){e.currentTarget.setPointerCapture(e.pointerId);pointerMove(e);}}} onPointerMove={e=>{if(e.buttons)pointerMove(e);}} onPointerUp={e=>{if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);}} onPointerCancel={()=>{inputRef.current.x=.5;send('input',{x:.5});}}>
     <canvas ref={canvasRef} className="babylon_canvas" aria-hidden="true"/>{sceneBorderVisible&&<div className="babylon_scene_border" aria-hidden="true"/>}

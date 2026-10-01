@@ -1,10 +1,15 @@
-export const REMOTE_PADDLE_INTERPOLATION_MS = 75;
+// The room publishes at 20 Hz. Keep enough history in the past that ordinary
+// browser and network scheduling jitter still has a sample on both sides.
+export const REMOTE_PADDLE_INTERPOLATION_MS = 125;
 
 export function pushGameSnapshot(history, gameState, receivedAt, maxSamples = 8) {
   if (!gameState || !Number.isFinite(receivedAt) || maxSamples < 2) return history;
+  // Copy mutable server state at receipt time. React may coalesce renders, and
+  // retaining an object reference can make old samples reflect only new values.
+  const snapshot = { ...gameState, paddles: (gameState.paddles ?? []).map((paddle) => ({ ...paddle })) };
   const previous = history.at(-1);
-  if (previous?.gameState === gameState) return history;
-  history.push({ receivedAt, gameState });
+  if (previous && receivedAt <= previous.receivedAt) receivedAt = previous.receivedAt + 0.01;
+  history.push({ receivedAt, gameState: snapshot });
   if (history.length > maxSamples) history.splice(0, history.length - maxSamples);
   return history;
 }
