@@ -1,16 +1,16 @@
 # babylon-lite-content Specification
 
 ## Purpose
-Provides a working Babylon Lite content-layer example with a crisp 2D pixel-art policy, a small original showcase asset, and clear behavior when WebGPU is unavailable.
+Provides a Babylon Lite content layer with crisp 2D pixel-art rendering, project-owned game content, and clear behavior when WebGPU is unavailable.
 
 ## Requirements
 
 ### Requirement: Developer-selectable content mode
-The template SHALL expose renderer and 2D/3D content-style selection through developer-editable configuration in the content layer. Its default selection SHALL show the Babylon Lite 2D showcase, and the selection SHALL NOT require a runtime mode picker.
+The application MUST initialize the playable Neon Breaker Duo game by default using Babylon Lite's WebGPU 2D Pixel Perfect content pipeline. The game content MUST use nearest-sampled artwork, disable texture mipmaps and antialiasing for pixel art, and preserve crisp integer scaling whenever it fits the viewport, with documented fractional fit when it does not. There MUST NOT be a runtime mode picker. Developers MAY select another content implementation through source configuration; unsupported content MUST produce an actionable initialization message.
 
 #### Scenario: Default content mode
-- **WHEN** the template starts with its default content configuration
-- **THEN** it displays the Babylon Lite 2D showcase using the Pixel Perfect policy
+- **WHEN** the application loads in a supported WebGPU browser
+- **THEN** it initializes the portrait Neon Breaker Duo board without first showing a showcase or mode picker
 
 #### Scenario: 3D content style selected
 - **WHEN** a developer selects 3D content
@@ -30,24 +30,6 @@ When Babylon Lite and 2D content are selected, the renderer SHALL use a sharp pi
 #### Scenario: No integer scale fits
 - **WHEN** the available viewport cannot fit the logical scene at 1x
 - **THEN** the configured nonzero fractional-fit fallback displays the scene without distortion and documents that strict integer pixel guarantees are suspended
-
-### Requirement: Pixel-art showcase scene
-The default 2D showcase SHALL render on a white background with an original 32x32 pixel-art tile consisting of concentric black and gray squares with deliberate stair-step edges. The tile SHALL rotate slowly around its visual center.
-
-#### Scenario: Centered rotation
-- **WHEN** the showcase is running
-- **THEN** the tile remains centered in the content scene and rotates continuously around its center without the React UI layer moving with it
-
-#### Scenario: Pixel-art edges
-- **WHEN** the tile is rendered at its authored resolution or integer-scaled display size
-- **THEN** its black and gray pixels retain hard boundaries and visibly stepped edges without blended edge colors
-
-### Requirement: Native-size showcase sprite
-The original 32x32 showcase sprite SHALL render at exactly 32x32 Babylon Lite backing-store pixels, independent of the stage scale and device pixel ratio, so its authored texels stay at native size.
-
-#### Scenario: Render at native size
-- **WHEN** the showcase renders at any supported device pixel ratio
-- **THEN** Babylon Lite draws the sprite at 32x32 backing-store pixels and keeps it centered in the content scene
 
 ### Requirement: Viewport settings label and modal-controlled world-edge outline
 The React UI layer SHALL render a left-justified three-line settings label in the lower white UI band, centered horizontally near its bottom edge as indicated by marker 2 in the reference. Its text color SHALL match the supplied `#e0694b` swatch. Its first line `(B) Babylon Lite` SHALL use the existing `corner-title` font style; its scale and mode lines SHALL use `corner-body`. The label SHALL show `Scale: <current scale>x Integer|Fractional` and `Mode: 2DPixelPerfect`. Clicking `(B)` SHALL open a React settings dialog showing the same three settings, with all visible dialog text (including its title and close control) using the same `#e0694b` color. While that dialog is open, Babylon Lite SHALL draw a 5-CSS-pixel `#e0694b` outline on all four content-world edges; closing the dialog with its close control or Escape SHALL remove the Babylon Lite outline. The outline SHALL use nearest-sampled sprites and update after viewport/DPR changes. Babylon Lite processing, including rendering and sprite animations, SHALL pause while any Config, Stats, or Babylon Lite dialog is visible and SHALL resume when all such dialogs are closed.

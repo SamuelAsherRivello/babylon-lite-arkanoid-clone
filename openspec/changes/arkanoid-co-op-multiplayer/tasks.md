@@ -20,8 +20,8 @@
 - [x] 3.1 Run the app test suite and production build; verify GitHub Pages subpath assets and documented `npm install` / `npm run dev` launch.
 - [x] 3.2 Verify the live WebGPU board, ball launch and brick scoring, shared lives, both seats, pointer lane control, keyboard pause/resume and local pause in two browser clients; verify victory, defeat and restart in deterministic game-rule tests. Exercise desktop rendering, narrow-layout fit tests, loaded assets, and browser console; note WebGPU requirement and that responsive sizing was verified with layout tests rather than a physical phone.
 - [x] 3.3 Test two independent browser clients locally and run the live public integration suite for shared state, late join, disconnect/rejoin, capacity, replay and game isolation; verify the public protocol and document in-memory hosting limits.
-- [ ] 3.4 Commit and push scoped game changes, run the checked-in Pages/release workflows, and verify the deployed public game URL, asset loading, visible version, controls, and multiplayer connection.
-- [ ] 3.5 Synchronize both local checkouts with their release-generated commits and verify final OpenSpec status, repository status, and remote revision alignment.
+- [x] 3.4 Commit and push scoped game changes, run the checked-in Pages/release workflows, and verify the deployed public game URL, asset loading, visible version, controls, and multiplayer connection.
+- [x] 3.5 Synchronize both local checkouts with their release-generated commits and verify final OpenSpec status, repository status, and remote revision alignment.
 
 
 
