@@ -77,38 +77,19 @@ The identity, stage layout, board patterns, sprites, UI and title are original. 
 - `neon-breaker-duo/` is the React/Vite app; `neon-breaker-duo/src/content/` contains the Babylon Lite WebGPU renderer and sprite presentation.
 - `neon-breaker-duo/src/game/` contains network session state and lane input mapping.
 - `neon-breaker-duo/test/` covers app configuration, renderer setup, controls and Pages paths.
-- `openspec/changes/arkanoid-co-op-multiplayer/` tracks the complete change and acceptance tasks.
+- `openspec/changes/archive/2026-10-01-arkanoid-co-op-multiplayer/` contains the completed change and acceptance tasks.
 - [`@babylonjs/lite`](https://www.npmjs.com/package/@babylonjs/lite) provides the required Babylon Lite runtime; pixel-art textures use nearest sampling, no mipmaps, no MSAA, and DPR-aware integer scaling when the stage fits.
 
 ## Original AI Prompt
 
 <details>
-<summary>Original request and follow-ups</summary>
-
-Original request:
+<summary>Read the full original prompt (edited for grammar, punctuation, spelling, and formatting)</summary>
 
 ```text
-update this game to be a multiplayer 2dpixelperfect clone of arkanoid
+Update this game to be a multiplayer 2D Pixel Perfect clone of Arkanoid.
 
 https://en.wikipedia.org/wiki/Arkanoid:_Revenge_of_Doh
 ```
-
-Follow-up requirements:
-
-```text
-include any art reference and gameplayer references. finish the prompt setup
-update hte prompt finish it
-create a complete multiplayer game that launches from the README and is fully playable when complete
-Solve all your needs to run openspec, create proposal, apply it and finish
-```
-
-Optional reference supplied later:
-
-```text
-https://itch.io/games/html5/tag-arkanoid
-```
-
-These quoted messages preserve the supplied request. Decisions made to complete unspecified details are documented in the gameplay and multiplayer sections above.
 
 </details>
 
