@@ -31,6 +31,10 @@ export function pushGameSnapshot(history, gameState, receivedAt, maxSamples = 8)
   }
   const orderedTimelineAt = previous && timelineAt <= previous.timelineAt ? previous.timelineAt + 0.01 : timelineAt;
   history.push({ receivedAt, timelineAt: orderedTimelineAt, gameState: snapshot });
+  // Keep a stable mapping between this server timeline and the client's
+  // monotonic clock. Re-anchoring playback to each packet's receipt time makes
+  // network transit variation move the playback clock forward and backward.
+  history.playbackAnchor ??= { receivedAt, timelineAt: orderedTimelineAt };
   if (history.length > maxSamples) history.splice(0, history.length - maxSamples);
   return history;
 }
@@ -44,8 +48,8 @@ export function getRemotePaddleInterpolationDelay() {
 // time elapsed since arrival, instead of letting network delivery jitter bend
 // the interpolation timeline.
 export function getRemotePaddleSampleTime(history, now, delay = REMOTE_PADDLE_INTERPOLATION_MS) {
-  const latest = history.at(-1);
-  return latest ? latest.timelineAt + (now - latest.receivedAt) - delay : now - delay;
+  const anchor = history.playbackAnchor;
+  return anchor ? anchor.timelineAt + (now - anchor.receivedAt) - delay : now - delay;
 }
 
 export function samplePaddlePositions(history, sampleAt) {
