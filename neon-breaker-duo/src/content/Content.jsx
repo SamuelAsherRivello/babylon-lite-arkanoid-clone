@@ -27,6 +27,7 @@ function PixelPerfectGame(){
   const hostRef=useRef(null),canvasRef=useRef(null),spriteStateRef=useRef(null),paintRef=useRef(null),resizeRef=useRef(()=>{}),engineRef=useRef(null),engineRunningRef=useRef(false),inputRef=useRef({x:.5,left:false,right:false}),localPaddleRef=useRef({seat:-1,x:null}),lastInputAtRef=useRef(0),lastPaintAtRef=useRef(0),renderPresetRef=useRef(renderPreset);
   renderPresetRef.current=renderPreset;
   const snapshotAtRef=useRef(0);
+  const remotePlaybackRef=useRef({sampleAt:0,latestSnapshotAt:0});
   const [message,setMessage]=useState('Starting Babylon Lite…');
   const game=state.gameState;
   useEffect(()=>{
@@ -49,7 +50,15 @@ function PixelPerfectGame(){
       const now=performance.now(),elapsed=lastPaintAtRef.current?Math.min(.05,Math.max(0,(now-lastPaintAtRef.current)/1000)):0;lastPaintAtRef.current=now;
       const direction=Number(inputRef.current.right)-Number(inputRef.current.left);
       if(direction){inputRef.current.x=movePaddleInput(inputRef.current.x,direction,.9*elapsed);lastInputAtRef.current=now;}
-      const remotePaddles=samplePaddlePositions(snapshotHistory,now-getRemotePaddleInterpolationDelay(snapshotHistory));
+      const latestSnapshotAt=snapshotHistory.at(-1)?.receivedAt??0;
+      const playback=remotePlaybackRef.current;
+      if(latestSnapshotAt<playback.latestSnapshotAt){playback.sampleAt=0;playback.latestSnapshotAt=0;}
+      if(latestSnapshotAt)playback.latestSnapshotAt=latestSnapshotAt;
+      const desiredSampleAt=now-getRemotePaddleInterpolationDelay(snapshotHistory);
+      // Increasing the adaptive buffer must not move the playback clock
+      // backward. A backward seek is visible as a remote paddle twitch.
+      playback.sampleAt=playback.sampleAt?Math.max(playback.sampleAt,desiredSampleAt):desiredSampleAt;
+      const remotePaddles=samplePaddlePositions(snapshotHistory,playback.sampleAt);
       const put=(sprite,x,y,w,h,frame)=>updateSprite2D(sprite,{positionPx:[x,y],sizePx:[w,h],frame});
       sprites.bricks.forEach((sprite,i)=>{const b=g.bricks[i];put(sprite,b?b.x+b.w/2:-40,b?b.y+b.h/2:-40,b?.w??2,b?.h??2,b?.kind==='reinforced'?1:0);});
       sprites.paddles.forEach((sprite,i)=>{
