@@ -26,14 +26,12 @@ function PixelPerfectGame(){
   const {state,seat,send,paused,setPaused,retry,snapshotHistory}=useGameSession();
   const hostRef=useRef(null),canvasRef=useRef(null),spriteStateRef=useRef(null),paintRef=useRef(null),resizeRef=useRef(()=>{}),engineRef=useRef(null),engineRunningRef=useRef(false),inputRef=useRef({x:.5,left:false,right:false}),localPaddleRef=useRef({seat:-1,x:null}),lastInputAtRef=useRef(0),lastPaintAtRef=useRef(0),renderPresetRef=useRef(renderPreset);
   renderPresetRef.current=renderPreset;
-  const snapshotAtRef=useRef(0);
-  const remotePlaybackRef=useRef({sampleAt:0,latestSnapshotAt:0});
   const remotePaddleRenderRef=useRef(new Map());
   const [message,setMessage]=useState('Starting Babylon Lite…');
   const game=state.gameState;
   useEffect(()=>{
     if(!game){spriteStateRef.current=null;localPaddleRef.current={seat:-1,x:null};return;}
-    const receivedAt=performance.now();spriteStateRef.current=game;snapshotAtRef.current=receivedAt;
+    const receivedAt=performance.now();spriteStateRef.current=game;
     const authoritative=game.paddles?.[seat];
     if(authoritative){
       if(localPaddleRef.current.seat!==seat||localPaddleRef.current.x===null)localPaddleRef.current={seat,x:authoritative.x};
@@ -51,15 +49,8 @@ function PixelPerfectGame(){
       const now=performance.now(),elapsed=lastPaintAtRef.current?Math.min(.05,Math.max(0,(now-lastPaintAtRef.current)/1000)):0;lastPaintAtRef.current=now;
       const direction=Number(inputRef.current.right)-Number(inputRef.current.left);
       if(direction){inputRef.current.x=movePaddleInput(inputRef.current.x,direction,.9*elapsed);lastInputAtRef.current=now;}
-      const latestSnapshotAt=snapshotHistory.at(-1)?.receivedAt??0;
-      const playback=remotePlaybackRef.current;
-      if(latestSnapshotAt<playback.latestSnapshotAt){playback.sampleAt=0;playback.latestSnapshotAt=0;}
-      if(latestSnapshotAt)playback.latestSnapshotAt=latestSnapshotAt;
-      const desiredSampleAt=now-getRemotePaddleInterpolationDelay(snapshotHistory);
-      // Increasing the adaptive buffer must not move the playback clock
-      // backward. A backward seek is visible as a remote paddle twitch.
-      playback.sampleAt=playback.sampleAt?Math.max(playback.sampleAt,desiredSampleAt):desiredSampleAt;
-      const remotePaddles=samplePaddlePositions(snapshotHistory,playback.sampleAt);
+      const desiredSampleAt=now-getRemotePaddleInterpolationDelay();
+      const remotePaddles=samplePaddlePositions(snapshotHistory,desiredSampleAt);
       const put=(sprite,x,y,w,h,frame)=>updateSprite2D(sprite,{positionPx:[x,y],sizePx:[w,h],frame});
       sprites.bricks.forEach((sprite,i)=>{const b=g.bricks[i];put(sprite,b?b.x+b.w/2:-40,b?b.y+b.h/2:-40,b?.w??2,b?.h??2,b?.kind==='reinforced'?1:0);});
       sprites.paddles.forEach((sprite,i)=>{
