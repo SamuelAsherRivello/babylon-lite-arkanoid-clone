@@ -4,7 +4,7 @@ A portrait-only, two-player online brick breaker: share one board, return the ba
 
 ## Live Demo
 
-- [Play Neon Breaker Duo · Playtest v0.0.11](https://samuelasherrivello.github.io/babylon-lite-arkanoid-clone/)
+- [Play Neon Breaker Duo · Playtest v0.0.12](https://samuelasherrivello.github.io/babylon-lite-arkanoid-clone/)
 
 ## Table of Contents
 

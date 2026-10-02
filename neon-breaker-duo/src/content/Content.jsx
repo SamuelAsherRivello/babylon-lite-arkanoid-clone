@@ -8,7 +8,7 @@ import { useViewportInfo } from '../ui/ViewportInfoContext.jsx';
 import { useGameSession } from '../game/GameSession.jsx';
 import { movePaddleInput, toPaddleInput } from '../game/controls.js';
 import {
-  advancePaddleTowardTarget, paddleTargetX,
+  advancePaddleTowardTarget, paddleTargetX, smoothRemotePaddlePosition,
   getRemotePaddleInterpolationDelay, samplePaddlePositions,
 } from '../game/presentation.js';
 import { getInitializationMessage } from './babylon/initialization.js';
@@ -28,6 +28,7 @@ function PixelPerfectGame(){
   renderPresetRef.current=renderPreset;
   const snapshotAtRef=useRef(0);
   const remotePlaybackRef=useRef({sampleAt:0,latestSnapshotAt:0});
+  const remotePaddleRenderRef=useRef(new Map());
   const [message,setMessage]=useState('Starting Babylon Lite…');
   const game=state.gameState;
   useEffect(()=>{
@@ -67,7 +68,13 @@ function PixelPerfectGame(){
           const prediction=localPaddleRef.current;
           if(prediction.seat!==seat||prediction.x===null)localPaddleRef.current={seat,x};
           const local=localPaddleRef.current;local.x=advancePaddleTowardTarget(local.x,paddleTargetX(inputRef.current.x,p?.width??38),elapsed);x=local.x;
-        }else x=remotePaddles.find((remote)=>remote.seat===i)?.x??x;
+        }else {
+          const sampled=remotePaddles.find((remote)=>remote.seat===i)?.x??x;
+          const rendered=remotePaddleRenderRef.current;
+          const previous=rendered.get(i);
+          x=previous===undefined?sampled:smoothRemotePaddlePosition(previous,sampled,elapsed);
+          rendered.set(i,x);
+        }
         put(sprite,x,p?.y??(i===0?490:440),p?.width??38,8,i?4:3);
       });
       sprites.balls.forEach((sprite,i)=>{const b=g.balls[i];put(sprite,b?b.x+b.vx*elapsed:-40,b?b.y+b.vy*elapsed:-40,8,8,2);});

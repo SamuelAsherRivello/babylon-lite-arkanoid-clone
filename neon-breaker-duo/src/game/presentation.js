@@ -73,3 +73,12 @@ export function advancePaddleTowardTarget(position, target, elapsedSeconds, spee
   const maxDistance = speed * Math.min(elapsedSeconds, 0.05);
   return position + Math.max(-maxDistance, Math.min(maxDistance, target - position));
 }
+
+// A tiny render-only low-pass filter hides subpixel stepping when received
+// snapshots arrive unevenly. The time-based factor behaves the same at 60 Hz
+// and 120 Hz, and is intentionally independent of authoritative game state.
+export function smoothRemotePaddlePosition(position, target, elapsedSeconds, responseTime = 0.045) {
+  if (![position, target, elapsedSeconds, responseTime].every(Number.isFinite) || elapsedSeconds <= 0 || responseTime <= 0) return position;
+  const alpha = 1 - Math.exp(-Math.min(elapsedSeconds, 0.05) / responseTime);
+  return position + (target - position) * alpha;
+}
