@@ -9,7 +9,7 @@ import { useGameSession } from '../game/GameSession.jsx';
 import { movePaddleInput, toPaddleInput } from '../game/controls.js';
 import {
   advancePaddleTowardTarget, paddleTargetX, smoothRemotePaddlePosition,
-  getRemotePaddleInterpolationDelay, samplePaddlePositions,
+  getRemotePaddleSampleTime, getRemotePaddleInterpolationDelay, samplePaddlePositions,
 } from '../game/presentation.js';
 import { getInitializationMessage } from './babylon/initialization.js';
 import { getLogicalToRenderScale } from './babylon/pixel-perfect.js';
@@ -49,7 +49,7 @@ function PixelPerfectGame(){
       const now=performance.now(),elapsed=lastPaintAtRef.current?Math.min(.05,Math.max(0,(now-lastPaintAtRef.current)/1000)):0;lastPaintAtRef.current=now;
       const direction=Number(inputRef.current.right)-Number(inputRef.current.left);
       if(direction){inputRef.current.x=movePaddleInput(inputRef.current.x,direction,.9*elapsed);lastInputAtRef.current=now;}
-      const desiredSampleAt=now-getRemotePaddleInterpolationDelay();
+      const desiredSampleAt=getRemotePaddleSampleTime(snapshotHistory,now,getRemotePaddleInterpolationDelay());
       const remotePaddles=samplePaddlePositions(snapshotHistory,desiredSampleAt);
       const put=(sprite,x,y,w,h,frame)=>updateSprite2D(sprite,{positionPx:[x,y],sizePx:[w,h],frame});
       sprites.bricks.forEach((sprite,i)=>{const b=g.bricks[i];put(sprite,b?b.x+b.w/2:-40,b?b.y+b.h/2:-40,b?.w??2,b?.h??2,b?.kind==='reinforced'?1:0);});

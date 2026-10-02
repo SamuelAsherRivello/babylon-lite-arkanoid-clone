@@ -9,8 +9,17 @@ export function pushGameSnapshot(history, gameState, receivedAt, maxSamples = 8)
   // retaining an object reference can make old samples reflect only new values.
   const snapshot = { ...gameState, paddles: (gameState.paddles ?? []).map((paddle) => ({ ...paddle })) };
   const previous = history.at(-1);
-  if (previous && receivedAt <= previous.receivedAt) receivedAt = previous.receivedAt + 0.01;
-  history.push({ receivedAt, gameState: snapshot });
+  let timelineAt = Number.isFinite(snapshot.serverTime) ? snapshot.serverTime : receivedAt;
+  if (previous && !Number.isFinite(snapshot.serverTime)) {
+    // Older deployed servers don't send a server clock. Normalize ordinary
+    // packet-arrival variation to the room's 20 Hz cadence, while preserving
+    // gaps long enough to indicate one or more missed snapshots.
+    const arrivalGap = receivedAt - previous.receivedAt;
+    const tickCount = arrivalGap < 100 ? 1 : Math.max(1, Math.round(arrivalGap / 50));
+    timelineAt = previous.timelineAt + tickCount * 50;
+  }
+  const orderedTimelineAt = previous && timelineAt <= previous.timelineAt ? previous.timelineAt + 0.01 : timelineAt;
+  history.push({ receivedAt, timelineAt: orderedTimelineAt, gameState: snapshot });
   if (history.length > maxSamples) history.splice(0, history.length - maxSamples);
   return history;
 }
@@ -19,24 +28,33 @@ export function getRemotePaddleInterpolationDelay() {
   return REMOTE_PADDLE_INTERPOLATION_MS;
 }
 
+// Advance server time using the latest packet's local receipt anchor. This
+// preserves the server's regular snapshot spacing while accounting for render
+// time elapsed since arrival, instead of letting network delivery jitter bend
+// the interpolation timeline.
+export function getRemotePaddleSampleTime(history, now, delay = REMOTE_PADDLE_INTERPOLATION_MS) {
+  const latest = history.at(-1);
+  return latest ? latest.timelineAt + (now - latest.receivedAt) - delay : now - delay;
+}
+
 export function samplePaddlePositions(history, sampleAt) {
   if (history.length === 0) return [];
   const latest = history.at(-1);
-  if (sampleAt > latest.receivedAt) {
-    const elapsedSeconds = Math.min(0.05, (sampleAt - latest.receivedAt) / 1000);
+  if (sampleAt > latest.timelineAt) {
+    const elapsedSeconds = Math.min(0.05, (sampleAt - latest.timelineAt) / 1000);
     return (latest.gameState.paddles ?? []).map((paddle) => ({
       ...paddle,
       x: advancePaddleTowardTarget(paddle.x, paddle.target, elapsedSeconds),
     }));
   }
-  let nextIndex = history.findIndex((sample) => sample.receivedAt >= sampleAt);
+  let nextIndex = history.findIndex((sample) => sample.timelineAt >= sampleAt);
   if (nextIndex === 0) return history[0].gameState.paddles ?? [];
 
   const before = history[nextIndex - 1];
   const after = history[nextIndex];
-  const duration = after.receivedAt - before.receivedAt;
+  const duration = after.timelineAt - before.timelineAt;
   if (duration <= 0) return after.gameState.paddles ?? [];
-  const amount = Math.max(0, Math.min(1, (sampleAt - before.receivedAt) / duration));
+  const amount = Math.max(0, Math.min(1, (sampleAt - before.timelineAt) / duration));
   const beforeBySeat = new Map((before.gameState.paddles ?? []).map((paddle) => [paddle.seat, paddle]));
 
   return (after.gameState.paddles ?? []).map((paddle) => {
