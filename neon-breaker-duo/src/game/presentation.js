@@ -9,14 +9,25 @@ export function pushGameSnapshot(history, gameState, receivedAt, maxSamples = 8)
   // retaining an object reference can make old samples reflect only new values.
   const snapshot = { ...gameState, paddles: (gameState.paddles ?? []).map((paddle) => ({ ...paddle })) };
   const previous = history.at(-1);
-  let timelineAt = Number.isFinite(snapshot.serverTime) ? snapshot.serverTime : receivedAt;
-  if (previous && !Number.isFinite(snapshot.serverTime)) {
-    // Older deployed servers don't send a server clock. Normalize ordinary
-    // packet-arrival variation to the room's 20 Hz cadence, while preserving
-    // gaps long enough to indicate one or more missed snapshots.
-    const arrivalGap = receivedAt - previous.receivedAt;
-    const tickCount = arrivalGap < 100 ? 1 : Math.max(1, Math.round(arrivalGap / 50));
-    timelineAt = previous.timelineAt + tickCount * 50;
+  // Keep timelineAt in the same monotonic clock domain as receivedAt and the
+  // render loop's performance.now(). Server Date.now() is an epoch clock and
+  // cannot be compared directly with performance.now(); use it only to measure
+  // the interval between snapshots, anchored to the first local receipt.
+  let timelineAt = receivedAt;
+  if (previous) {
+    const hasServerInterval = Number.isFinite(snapshot.serverTime)
+      && Number.isFinite(previous.gameState.serverTime)
+      && snapshot.serverTime > previous.gameState.serverTime;
+    if (hasServerInterval) {
+      timelineAt = previous.timelineAt + (snapshot.serverTime - previous.gameState.serverTime);
+    } else {
+      // Older deployed servers don't send a server clock. Normalize ordinary
+      // packet-arrival variation to the room's 20 Hz cadence, while preserving
+      // gaps long enough to indicate one or more missed snapshots.
+      const arrivalGap = receivedAt - previous.receivedAt;
+      const tickCount = arrivalGap < 100 ? 1 : Math.max(1, Math.round(arrivalGap / 50));
+      timelineAt = previous.timelineAt + tickCount * 50;
+    }
   }
   const orderedTimelineAt = previous && timelineAt <= previous.timelineAt ? previous.timelineAt + 0.01 : timelineAt;
   history.push({ receivedAt, timelineAt: orderedTimelineAt, gameState: snapshot });
